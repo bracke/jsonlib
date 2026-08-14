@@ -1,0 +1,11 @@
+/obj/
+/lib/
+/alire/
+/config/
+tests/obj/
+tests/bin/
+tests/alire/
+tests/config/
+
+*.ali
+*.o

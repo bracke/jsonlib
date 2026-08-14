@@ -1,0 +1,26 @@
+name = "jsonlib_tests"
+description = "Standalone testsuite for the jsonlib crate"
+version = "0.1.0-dev"
+
+authors = ["Bent Bracke"]
+maintainers = ["Bent Bracke <bent@bracke.dk>"]
+maintainers-logins = ["bracke"]
+licenses = "MIT"
+tags = ["tests"]
+
+executables = ["jsonlib_tests"]
+
+[[depends-on]]
+gnat_native = "=15.2.1"
+
+[[depends-on]]
+jsonlib = "*"
+
+[[pins]]
+jsonlib = { path = ".." }
+
+[[depends-on]]
+aunit = "^26.0.0"
+
+[build-profiles]
+"*" = "development"

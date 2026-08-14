@@ -1,0 +1,24 @@
+name = "jsonlib"
+description = "JSON, read and written exactly: RFC 8259 with nothing added"
+version = "0.1.0-dev"
+
+authors = ["Bent Bracke"]
+maintainers = ["Bent Bracke <bent@bracke.dk>"]
+maintainers-logins = ["bracke"]
+licenses = "MIT"
+website = ""
+long-description = "jsonlib is the one place JSON is parsed and written. It reads RFC 8259 and nothing else -- no comments, no trailing commas, no unquoted keys, no NaN -- because a parser that quietly accepts more than the standard produces documents other tools reject, and the author finds out from someone else's error message. Malformed input is a structured refusal carrying a code and a position, never an exception and never a guess: exceptions are for defects in the program, not for facts about the input. Numbers keep the text they were written with, so a document that is read and written again comes back byte for byte."
+tags = ["json", "parser", "serialization"]
+
+[[depends-on]]
+gnat_native = "=15.2.1"
+
+# Build dependencies in the development profile (-Og) too, not the default
+# release (-O3). Keeping every root on the same profile lets them share object
+# files instead of forcing a rebuild whenever a different root is built.
+[build-profiles]
+"*" = "development"
+
+[[actions]]
+type = "test"
+command = ["sh", "-c", "cd tests && alr -n build && ./bin/jsonlib_tests"]

@@ -1,0 +1,23 @@
+with "config/jsonlib_tests_config.gpr";
+project Jsonlib_Tests is
+
+   for Source_Dirs use ("tests/src/", "config/");
+   for Object_Dir use "obj/" & Jsonlib_Tests_Config.Build_Profile;
+   for Create_Missing_Dirs use "True";
+   for Exec_Dir use "bin";
+   for Main use ("jsonlib_tests.adb");
+
+   package Compiler is
+      for Default_Switches ("Ada") use
+        Jsonlib_Tests_Config.Ada_Compiler_Switches
+        & ("-gnat2022", "-gnata", "-gnatwa", "-gnatw.X", "-g", "-gnatyM120");
+   end Compiler;
+
+   --  Bytes out as bytes in; see the note in jsonlib.gpr. It matters more in
+   --  the tests than anywhere: a test comparing UTF-8 byte for byte would pass
+   --  or fail depending on the binder's encoding rather than on the code.
+   package Binder is
+      for Switches ("Ada") use ("-Es", "-Wb");
+   end Binder;
+
+end Jsonlib_Tests;

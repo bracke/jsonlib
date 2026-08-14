@@ -1,0 +1,41 @@
+with "config/jsonlib_config.gpr";
+project Jsonlib is
+
+   for Library_Name use "Jsonlib";
+   for Library_Version use Project'Library_Name & ".so." & Jsonlib_Config.Crate_Version;
+
+   for Source_Dirs use ("src/", "config/");
+   for Object_Dir use "obj/" & Jsonlib_Config.Build_Profile;
+   for Create_Missing_Dirs use "True";
+   for Library_Dir use "lib";
+
+   type Library_Type_Type is ("relocatable", "static", "static-pic");
+   Library_Type : Library_Type_Type :=
+     external ("JSONLIB_LIBRARY_TYPE", external ("LIBRARY_TYPE", "static"));
+   for Library_Kind use Library_Type;
+
+   package Compiler is
+      --  The build profile's switches first, then this project's own. Leaving
+      --  them out silently discards the optimization level, so every profile
+      --  compiles at -O0.
+      for Default_Switches ("Ada") use
+        Jsonlib_Config.Ada_Compiler_Switches
+        & ("-gnat2022", "-gnata", "-gnatwa", "-gnatw.X", "-g", "-gnatyM120");
+   end Compiler;
+
+   package Binder is
+      --  Bytes out as bytes in. Alire's generated switches carry -gnatW8 and
+      --  the binder takes its run-time encoding from the same place, which
+      --  makes Ada.Text_IO encode every byte above 127 a second time on the
+      --  way out. A document that was already UTF-8 comes out doubled. -Wb is
+      --  the compiler default and leaves the bytes alone -- which matters more
+      --  here than in most crates, because this one exists to move other
+      --  people's text through itself unchanged.
+      for Switches ("Ada") use ("-Es", "-Wb");
+   end Binder;
+
+   package Install is
+      for Artifacts (".") use ("share");
+   end Install;
+
+end Jsonlib;
