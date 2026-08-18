@@ -91,3 +91,22 @@ cd tests && alr build && ./bin/jsonlib_tests
 ```
 
 Ada 2022, no dependencies beyond the compiler.
+
+## Building and checking it
+
+```sh
+alr build                                      # the library
+cd tests && alr build && ./bin/jsonlib_tests   # the suite
+cd check_jsonlib && alr build && ./bin/check_jsonlib   # the release gate
+```
+
+CI runs all three on Linux, macOS and Windows.
+
+The gate checks the claims this repository makes about itself: that every
+refusal the library can produce has a row in [docs/refusals.md](docs/refusals.md)
+and that every row names a code that exists, that every case package is
+registered by the suite, and that the documents a reader is entitled to find are
+here. A claim nothing checks is a claim that drifts.
+
+Guidance for agents working here is in [AGENTS.md](AGENTS.md), which `CLAUDE.md`
+imports so there is one copy rather than two.

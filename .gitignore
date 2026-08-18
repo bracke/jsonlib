@@ -9,3 +9,9 @@ tests/config/
 
 *.ali
 *.o
+
+# The release gate is its own crate, with its own build tree.
+check_jsonlib/obj/
+check_jsonlib/bin/
+check_jsonlib/alire/
+check_jsonlib/config/

@@ -1,0 +1,20 @@
+with "config/check_jsonlib_config.gpr";
+project Check_Jsonlib is
+
+   for Source_Dirs use ("src/", "config/");
+   for Object_Dir use "obj/" & Check_Jsonlib_Config.Build_Profile;
+   for Create_Missing_Dirs use "True";
+   for Exec_Dir use "bin";
+   for Main use ("check_jsonlib.adb");
+
+   package Compiler is
+      for Default_Switches ("Ada") use
+        Check_Jsonlib_Config.Ada_Compiler_Switches
+        & ("-gnat2022", "-gnatyM100", "-gnata");
+   end Compiler;
+
+   package Binder is
+      for Switches ("Ada") use ("-Es", "-Wb");
+   end Binder;
+
+end Check_Jsonlib;
