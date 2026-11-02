@@ -1,3 +1,5 @@
+with Ada.Containers.Indefinite_Hashed_Sets;
+with Ada.Strings.Hash;
 with Ada.Strings.Unbounded;
 
 with Jsonlib.Numbers;
@@ -488,8 +490,17 @@ package body Jsonlib.Parsers is
       --  Read an object.
       function Parse_Object (Depth : Natural) return Doc.Node;
 
+      --  The names an object has had, held apart so that asking whether one
+      --  came before is a lookup rather than a walk over every member: a
+      --  vocabulary of fifty thousand names took minutes walked.
+      package Name_Sets is new Ada.Containers.Indefinite_Hashed_Sets
+        (Element_Type        => String,
+         Hash                => Ada.Strings.Hash,
+         Equivalent_Elements => "=");
+
       function Parse_Object (Depth : Natural) return Doc.Node is
          Result : constant Doc.Node := Doc.New_Object (Into);
+         Seen   : Name_Sets.Set;
       begin
          Advance;  --  the opening brace
          Skip_Whitespace;
@@ -540,10 +551,11 @@ package body Jsonlib.Parsers is
 
                   case Settings.Duplicates is
                      when Refuse_Duplicates =>
-                        if Doc.Has_Member (Into, Result, To_String (Named)) then
+                        if Seen.Contains (To_String (Named)) then
                            Fail_At (Err.Duplicate_Member, Name_At);
                            return Doc.No_Node;
                         end if;
+                        Seen.Insert (To_String (Named));
 
                         Doc.Insert (Into, Result, To_String (Named), Value);
 

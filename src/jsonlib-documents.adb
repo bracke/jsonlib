@@ -395,16 +395,16 @@ package body Jsonlib.Documents is
    -- Append --
    ------------
 
+   --  The container is changed where it is: a copy of it, changed and put
+   --  back, copied every child it had, and building an array of n elements
+   --  was quadratic.
    procedure Append (Into : in out Document; To : Node; Item : Node) is
-      Container : Node_Record;
    begin
       Check (Into, To, Array_Value);
       Check_Exists (Into, Item);
 
-      Container := Into.Nodes.Element (Positive (To));
-      Container.Children.Append
+      Into.Nodes.Reference (Positive (To)).Children.Append
         (Child'(Name => Null_Unbounded_String, Target => Item));
-      Into.Nodes.Replace_Element (Positive (To), Container);
    end Append;
 
    ------------
@@ -416,15 +416,12 @@ package body Jsonlib.Documents is
                      Named : String;
                      Item : Node)
    is
-      Container : Node_Record;
    begin
       Check (Into, To, Object_Value);
       Check_Exists (Into, Item);
 
-      Container := Into.Nodes.Element (Positive (To));
-      Container.Children.Append
+      Into.Nodes.Reference (Positive (To)).Children.Append
         (Child'(Name => To_Unbounded_String (Named), Target => Item));
-      Into.Nodes.Replace_Element (Positive (To), Container);
    end Insert;
 
    ----------------
@@ -436,28 +433,27 @@ package body Jsonlib.Documents is
                          Named : String;
                          Item : Node)
    is
-      Container : Node_Record;
    begin
       Check (Into, To, Object_Value);
       Check_Exists (Into, Item);
 
-      Container := Into.Nodes.Element (Positive (To));
+      declare
+         Container : Node_Record renames Into.Nodes.Reference (Positive (To)).Element.all;
+      begin
+         for Index in 1 .. Natural (Container.Children.Length) loop
+            if To_String (Container.Children.Element (Index).Name) = Named then
+               --  Replaced where it stands rather than moved to the end, so
+               --  rewriting one value in a file does not reorder it.
+               Container.Children.Replace_Element
+                 (Index,
+                  Child'(Name => To_Unbounded_String (Named), Target => Item));
+               return;
+            end if;
+         end loop;
 
-      for Index in 1 .. Natural (Container.Children.Length) loop
-         if To_String (Container.Children.Element (Index).Name) = Named then
-            --  Replaced where it stands rather than moved to the end, so
-            --  rewriting one value in a file does not reorder it.
-            Container.Children.Replace_Element
-              (Index,
-               Child'(Name => To_Unbounded_String (Named), Target => Item));
-            Into.Nodes.Replace_Element (Positive (To), Container);
-            return;
-         end if;
-      end loop;
-
-      Container.Children.Append
-        (Child'(Name => To_Unbounded_String (Named), Target => Item));
-      Into.Nodes.Replace_Element (Positive (To), Container);
+         Container.Children.Append
+           (Child'(Name => To_Unbounded_String (Named), Target => Item));
+      end;
    end Set_Member;
 
    -------------------
@@ -468,19 +464,19 @@ package body Jsonlib.Documents is
                            From : Node;
                            Named : String) return Boolean
    is
-      Container : Node_Record;
    begin
       Check (Into, From, Object_Value);
 
-      Container := Into.Nodes.Element (Positive (From));
-
-      for Index in 1 .. Natural (Container.Children.Length) loop
-         if To_String (Container.Children.Element (Index).Name) = Named then
-            Container.Children.Delete (Index);
-            Into.Nodes.Replace_Element (Positive (From), Container);
-            return True;
-         end if;
-      end loop;
+      declare
+         Container : Node_Record renames Into.Nodes.Reference (Positive (From)).Element.all;
+      begin
+         for Index in 1 .. Natural (Container.Children.Length) loop
+            if To_String (Container.Children.Element (Index).Name) = Named then
+               Container.Children.Delete (Index);
+               return True;
+            end if;
+         end loop;
+      end;
 
       return False;
    end Remove_Member;

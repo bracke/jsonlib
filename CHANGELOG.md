@@ -15,7 +15,10 @@ against.
 - Reading a member or an element of a large object or array copied the whole
   node -- every child -- on each call, so walking a document of n members
   was quadratic: a fifty-thousand-member vocabulary took minutes. The
-  readers now look at the node where it is.
+  readers now look at the node where it is, and appending, inserting,
+  setting and removing a member change it where it is.
+- Refusing a repeated member name walked every member before it: quadratic
+  again. The names an object has had are now held in a set while it is read.
 
 ### Added
 
