@@ -10,6 +10,13 @@ against.
 
 ## [Unreleased]
 
+### Fixed
+
+- Reading a member or an element of a large object or array copied the whole
+  node -- every child -- on each call, so walking a document of n members
+  was quadratic: a fifty-thousand-member vocabulary took minutes. The
+  readers now look at the node where it is.
+
 ### Added
 
 - The whole crate: [RFC 8259](https://www.rfc-editor.org/rfc/rfc8259) read and

@@ -33,10 +33,10 @@ package body Jsonlib.Documents is
    begin
       Check_Exists (From, Item);
 
-      if From.Nodes.Element (Positive (Item)).Kind /= Expected then
+      if From.Nodes.Constant_Reference (Positive (Item)).Kind /= Expected then
          raise Kind_Error
            with "asked a " & Value_Kind'Image
-                  (From.Nodes.Element (Positive (Item)).Kind)
+                  (From.Nodes.Constant_Reference (Positive (Item)).Kind)
                 & " for its " & Value_Kind'Image (Expected);
       end if;
    end Check;
@@ -66,7 +66,7 @@ package body Jsonlib.Documents is
    function Kind (From : Document; Item : Node) return Value_Kind is
    begin
       Check_Exists (From, Item);
-      return From.Nodes.Element (Positive (Item)).Kind;
+      return From.Nodes.Constant_Reference (Positive (Item)).Kind;
    end Kind;
 
    ----------------
@@ -76,7 +76,7 @@ package body Jsonlib.Documents is
    function As_Boolean (From : Document; Item : Node) return Boolean is
    begin
       Check (From, Item, Boolean_Value);
-      return From.Nodes.Element (Positive (Item)).Flag;
+      return From.Nodes.Constant_Reference (Positive (Item)).Flag;
    end As_Boolean;
 
    ----------------
@@ -87,7 +87,7 @@ package body Jsonlib.Documents is
    is
    begin
       Check (From, Item, Integer_Value);
-      return From.Nodes.Element (Positive (Item)).Whole;
+      return From.Nodes.Constant_Reference (Positive (Item)).Whole;
    end As_Integer;
 
    --------------
@@ -101,14 +101,14 @@ package body Jsonlib.Documents is
       --  An integer is accepted here on purpose: a program reading a timeout
       --  does not care whether the file said 5 or 5.0, and making it check
       --  would only mean every caller wrote the same two-branch helper.
-      case From.Nodes.Element (Positive (Item)).Kind is
+      case From.Nodes.Constant_Reference (Positive (Item)).Kind is
          when Integer_Value | Float_Value =>
-            return From.Nodes.Element (Positive (Item)).Real;
+            return From.Nodes.Constant_Reference (Positive (Item)).Real;
 
          when others =>
             raise Kind_Error
               with "asked a " & Value_Kind'Image
-                     (From.Nodes.Element (Positive (Item)).Kind)
+                     (From.Nodes.Constant_Reference (Positive (Item)).Kind)
                    & " for a number";
       end case;
    end As_Float;
@@ -120,7 +120,7 @@ package body Jsonlib.Documents is
    function As_String (From : Document; Item : Node) return String is
    begin
       Check (From, Item, String_Value);
-      return To_String (From.Nodes.Element (Positive (Item)).Text);
+      return To_String (From.Nodes.Constant_Reference (Positive (Item)).Text);
    end As_String;
 
    -------------
@@ -131,9 +131,9 @@ package body Jsonlib.Documents is
    begin
       Check_Exists (From, Item);
 
-      case From.Nodes.Element (Positive (Item)).Kind is
+      case From.Nodes.Constant_Reference (Positive (Item)).Kind is
          when Integer_Value | Float_Value =>
-            return To_String (From.Nodes.Element (Positive (Item)).Text);
+            return To_String (From.Nodes.Constant_Reference (Positive (Item)).Text);
 
          when others =>
             raise Kind_Error with "asked a non-number for its literal";
@@ -148,10 +148,10 @@ package body Jsonlib.Documents is
    begin
       Check_Exists (From, Item);
 
-      case From.Nodes.Element (Positive (Item)).Kind is
+      case From.Nodes.Constant_Reference (Positive (Item)).Kind is
          when Array_Value | Object_Value =>
             return Natural
-              (From.Nodes.Element (Positive (Item)).Children.Length);
+              (From.Nodes.Constant_Reference (Positive (Item)).Children.Length);
 
          when others =>
             raise Kind_Error with "asked a scalar for its length";
@@ -168,17 +168,17 @@ package body Jsonlib.Documents is
    begin
       Check_Exists (From, Item);
 
-      case From.Nodes.Element (Positive (Item)).Kind is
+      case From.Nodes.Constant_Reference (Positive (Item)).Kind is
          when Array_Value | Object_Value =>
             if Index > Natural
-                 (From.Nodes.Element (Positive (Item)).Children.Length)
+                 (From.Nodes.Constant_Reference (Positive (Item)).Children.Length)
             then
                --  Out of range is absence, not a defect: walking a document
                --  means asking for positions until there are none.
                return No_Node;
             end if;
 
-            return From.Nodes.Element (Positive (Item))
+            return From.Nodes.Constant_Reference (Positive (Item))
                      .Children.Element (Index).Target;
 
          when others =>
@@ -196,13 +196,13 @@ package body Jsonlib.Documents is
    begin
       Check (From, Item, Object_Value);
 
-      if Index > Natural (From.Nodes.Element (Positive (Item)).Children.Length)
+      if Index > Natural (From.Nodes.Constant_Reference (Positive (Item)).Children.Length)
       then
          return "";
       end if;
 
       return To_String
-        (From.Nodes.Element (Positive (Item)).Children.Element (Index).Name);
+        (From.Nodes.Constant_Reference (Positive (Item)).Children.Element (Index).Name);
    end Name;
 
    ------------
@@ -215,13 +215,13 @@ package body Jsonlib.Documents is
       Check (From, Item, Object_Value);
 
       for Index in 1 .. Natural
-        (From.Nodes.Element (Positive (Item)).Children.Length)
+        (From.Nodes.Constant_Reference (Positive (Item)).Children.Length)
       loop
          if To_String
-              (From.Nodes.Element (Positive (Item))
+              (From.Nodes.Constant_Reference (Positive (Item))
                  .Children.Element (Index).Name) = Named
          then
-            return From.Nodes.Element (Positive (Item))
+            return From.Nodes.Constant_Reference (Positive (Item))
                      .Children.Element (Index).Target;
          end if;
       end loop;
